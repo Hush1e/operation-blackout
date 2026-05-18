@@ -1,0 +1,6 @@
+{
+  "name": "Cyber Guard: The Graduation Day Hack",
+  "description": "A cybersecurity escape room challenge for students to stop a hacker attack on their school network.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
