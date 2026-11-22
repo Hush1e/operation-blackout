@@ -1,0 +1,28 @@
+import assert from 'node:assert/strict';
+import {reducer} from './game-test.mjs';
+const start=mode=>reducer({}, {type:'start',mode});
+const answer=(s,correct,email)=>reducer(s,{type:'answer',stage:s.stage,correct,message:'test feedback',email});
+let s=start('challenge');
+assert.equal(reducer(s,{type:'next'}).stage,0,'Cannot skip triage');
+s=answer(s,true,0);
+assert.equal(reducer(s,{type:'next'}).stage,0,'One legitimate message must not complete triage');
+assert.equal(answer(s,true,0).reviewed.length,1,'Duplicate clicks cannot award progress');
+s=answer(s,true,1);s=answer(s,true,2);s=reducer(s,{type:'next'});
+assert.equal(s.stage,1);
+const paused=reducer(s,{type:'pause'});
+assert.deepEqual(reducer(paused,{type:'tick'}),paused);
+assert.deepEqual(answer(paused,true),paused);
+for(let stage=1;stage<=4;stage++){assert.equal(s.stage,stage);s=answer(s,true);}
+assert.equal(s.stage,5);assert.equal(s.completed,5);
+assert.deepEqual(reducer(s,{type:'tick'}),s,'Victory stops timer');
+s=start('challenge');for(let i=0;i<7;i++)s=answer(s,false,0);
+assert.equal(s.stage,6,'Integrity depletion must end challenge immediately');assert.equal(s.integrity,0);
+s=start('challenge');for(let i=0;i<600;i++)s=reducer(s,{type:'tick'});
+assert.equal(s.stage,6,'Clock expiry ends game');assert.equal(s.left,0);
+s=start('challenge');for(let i=0;i<580;i++)s=reducer(s,{type:'tick'});s=answer(s,false,0);
+assert.equal(s.stage,6,'Penalty that exhausts time ends immediately');
+s=start('practice');for(let i=0;i<20;i++)s=answer(s,false,0);
+assert.equal(s.stage,0);assert.equal(s.integrity,100);assert.equal(s.left,600);
+s=reducer(s,{type:'hint'});s=reducer(s,{type:'hint'});assert.deepEqual(reducer(s,{type:'hint'}),s);
+s=reducer(s,{type:'reset'});assert.equal(s.stage,-1);assert.equal(s.reason,'');assert.equal(s.mistakes,0);
+console.log('PASS: full progression, triage gate, duplicate clicks, pause, victory, integrity failure, timeout, time penalty, practice retries, hints, restart.');
