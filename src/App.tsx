@@ -68,7 +68,7 @@ export default function App(){
  const heading=useRef<HTMLHeadingElement>(null);
  const active=s.stage>=0&&s.stage<=4;
  useEffect(()=>{if(!active||s.paused)return;const timer=setInterval(()=>dispatch({type:'tick'}),1000);return()=>clearInterval(timer);},[active,s.paused]);
- useEffect(()=>{setAnswer('');heading.current?.focus();},[s.stage]);
+ useEffect(()=>{setAnswer('');heading.current?.focus({preventScroll:true});window.scrollTo(0,0);},[s.stage]);
  const respond=(correct:boolean,message:string,email?:number)=>{tone(sound,correct);dispatch({type:'answer',correct,message,email,stage:s.stage});};
  const submit=(event:React.FormEvent)=>{
   event.preventDefault();
